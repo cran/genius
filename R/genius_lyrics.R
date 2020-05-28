@@ -7,9 +7,11 @@
 #'
 #'
 #' @examples
+#' \donttest{
 #' genius_lyrics(artist = "Margaret Glaspy", song = "Memory Street")
+#' }
 #' genius_lyrics(artist = "Kendrick Lamar", song = "Money Trees")
-#' genius_lyrics("JMSN", "Drinkin'")
+#' genius_lyrics("JMSN", "Drinkin")
 #'
 #' @export
 #' @import dplyr

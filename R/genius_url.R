@@ -85,7 +85,7 @@ genius_url <- function(url, info = "title")  {
     mutate(meta = str_extract(meta, "[^\\[].*[^\\]]")) %>%
 
     #make "element" and "artist" columns
-    # sections of a song are called an element. Artists are resopnsible for each element
+    # sections of a song are called an element. Artists are responsible for each element
     separate(meta, into = c("element", "element_artist"), sep = ": ", fill = "right") %>%
 
     #if song has no features
