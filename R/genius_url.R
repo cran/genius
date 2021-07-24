@@ -12,52 +12,71 @@ if(getRversion() >= "2.15.1")  {
 #' @param info Default \code{"title"}, returns the track title. Set to \code{"simple"} for only lyrics, \code{"artist"} for the lyrics and artist, \code{"features"} for song element and the artist of that element,  \code{"all"} to return artist, track, line, lyric, element, and element artist.
 #'
 #' @examples
-#' url <- gen_song_url(artist = "Kendrick Lamar", song = "HUMBLE")
-#' genius_url(url)
+#' \donttest{
+#' #' genius_url("https://genius.com/Head-north-in-the-water-lyrics", info = "all")
 #'
-#' genius_url("https://genius.com/Head-north-in-the-water-lyrics", info = "all")
+#' # url <- gen_song_url(artist = "Kendrick Lamar", song = "HUMBLE")
 #'
+#' # genius_url(url)
+#'
+#'}
 #' @export
-#' @import dplyr
-#' @importFrom rvest html_session html_node
-#' @importFrom tidyr spread fill separate replace_na
-#' @importFrom stringr str_detect str_extract
-#' @importFrom readr read_lines
+#' @importFrom rvest session html_nodes html_node html_text
+#' @importFrom tidyr pivot_wider fill separate replace_na
+#' @importFrom stringr str_detect str_extract str_replace_all str_trim
+#' @importFrom tibble tibble
+#' @importFrom dplyr mutate bind_rows case_when filter group_by ungroup n row_number
+#' @importFrom purrr pluck
 
 genius_url <- function(url, info = "title")  {
   # create a new session for scraping lyrics
-  session <- html_session(url)
+  # create a new session for scraping lyrics
+  genius_session <- session(url)
+
+
+  # Container classes are frequently changing
+  # need to id class based on partial name matching
+  # get the classes of all children of divs to pattern match properly
+  class_names <- genius_session %>%
+    rvest::html_elements("div") %>%
+    rvest::html_children() %>%
+    rvest::html_attr("class") %>%
+    unique() %>%
+    stats::na.omit() %>%
+    stringr::str_split("[:space:]") %>%
+    unlist()
+
+  # fetch class names for song title artist and lyrics
+  # will need to add `.` for all of them
+  title_class <- class_names[stringr::str_detect(class_names, "SongHeader__Title")]
+  artist_class <- class_names[stringr::str_detect(class_names, "SongHeader__Artist")]
+  lyrics_class <- class_names[stringr::str_detect(class_names, "Lyrics__Container")]
+
+
+
 
   # Get Artist name
-  artist <- html_nodes(session, ".header_with_cover_art-primary_info-primary_artist") %>%
+  artist <- html_nodes(genius_session, paste0(".", artist_class)) %>%
     html_text() %>%
     str_replace_all("\n", "") %>%
     str_trim()
 
   # Get Song title
-  song_title <- html_nodes(session, ".header_with_cover_art-primary_info-title") %>%
+  song_title <- html_nodes(genius_session, paste0(".", title_class)) %>%
     html_text() %>%
     str_replace_all("\n", "") %>%
     str_trim()
 
   # scrape the lyrics
   lyrics <- # read the text from the lyrics class
-    html_node(session, ".lyrics") %>%
+    # read the text from the lyrics class
+    html_node(genius_session, paste0(".", lyrics_class)) %>%
     # trim white space
     html_text(trim = TRUE) %>%
     # use named vector for cleaning purposes
-    str_replace_all(cleaning()) %>% {
-      # sometimes there is only one line in a song
-      # if vector length == one it will try to read the text as a filepath
-      # add blank text if it that long
-      if (length(.) == 1) {
-        . <- c(.,"")
-      }
-    } %>%
-    # read lines into a data frame
-    read_lines() %>%
-
-
+    str_replace_all(cleaning()) %>%
+    strsplit(split = "\n") %>%
+    purrr::pluck(1) %>%
     # filter to only rows with content
     .[str_detect(., "[[:alnum:]]")] %>%
 
@@ -74,9 +93,11 @@ genius_url <- function(url, info = "title")  {
              case_when(
                str_detect(lyric, "\\[|\\]") ~ "meta",
                TRUE ~ "lyric")) %>%
-    spread(key = type, value = lyric) %>%
-    filter(!is.na(line)) %>%
-    fill(meta) %>%
+    pivot_wider(names_from = type, values_from = lyric) %>%
+
+    #spread(key = type, value = lyric)
+    dplyr::filter(!is.na(line)) %>%
+    fill(meta, .direction = "down") %>%
 
     #remove producer info
     #filter(!str_detect(lyric, "[Pp]roducer")) %>%
@@ -85,7 +106,7 @@ genius_url <- function(url, info = "title")  {
     mutate(meta = str_extract(meta, "[^\\[].*[^\\]]")) %>%
 
     #make "element" and "artist" columns
-    # sections of a song are called an element. Artists are responsible for each element
+    # sections of a song are called an element. Artists are resopnsible for each element
     separate(meta, into = c("element", "element_artist"), sep = ": ", fill = "right") %>%
 
     #if song has no features
@@ -96,8 +117,8 @@ genius_url <- function(url, info = "title")  {
     # this is helpful to keep track of instrumentals
     group_by(element) %>%
 
-    # if there is only one line (meaning only elemnt info) keep the NA, else drop
-    filter(if_else(is.na(lyric) & n() > 1, FALSE, TRUE)) %>%
+    # if there is only one line (meaning only element info) keep the NA, else drop
+    filter(ifelse(is.na(lyric) & n() > 1, FALSE, TRUE)) %>%
     ungroup() %>%
 
     # create new line numbers incase they have been messed up

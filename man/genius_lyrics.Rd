@@ -18,9 +18,8 @@ Retrieve the lyrics of a song with supplied artist and song name.
 }
 \examples{
 \donttest{
-genius_lyrics(artist = "Margaret Glaspy", song = "Memory Street")
+# genius_lyrics(artist = "Margaret Glaspy", song = "Memory Street")
+# genius_lyrics(artist = "Kendrick Lamar", song = "Money Trees")
+# genius_lyrics("JMSN", "Drinkin'")
 }
-genius_lyrics(artist = "Kendrick Lamar", song = "Money Trees")
-genius_lyrics("JMSN", "Drinkin")
-
 }

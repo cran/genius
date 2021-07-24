@@ -8,16 +8,16 @@
 #'
 #' @examples
 #' \donttest{
-#' genius_lyrics(artist = "Margaret Glaspy", song = "Memory Street")
-#' }
-#' genius_lyrics(artist = "Kendrick Lamar", song = "Money Trees")
-#' genius_lyrics("JMSN", "Drinkin")
-#'
+#' # genius_lyrics(artist = "Margaret Glaspy", song = "Memory Street")
+#' # genius_lyrics(artist = "Kendrick Lamar", song = "Money Trees")
+#' # genius_lyrics("JMSN", "Drinkin'")
+#'}
 #' @export
 #' @import dplyr
 
 genius_lyrics <- function(artist = NULL, song = NULL, info = "title") {
   song_url <- gen_song_url(artist, song)
-  lyrics <- genius_url(song_url, info)
-  return(lyrics)
+
+  genius_url(song_url, info)
+
 }

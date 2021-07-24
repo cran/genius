@@ -9,35 +9,33 @@
 #'
 #' @examples
 #' \donttest{
-#' # Albums only
-#'
-#' artist_albums <- tibble::tribble(
-#'  ~artist, ~album,
-#'  "J. Cole", "KOD",
-#'  "Sampha", "Process"
-#')
-#'
-#'add_genius(artist_albums, artist, album, "album")
-#'
-#' # Individual Tracks only
-#'
-#' artist_songs <- tibble::tribble(
-#'  ~artist, ~track,
-#'  "J. Cole", "Motiv8",
-#'  "Andrew Bird", "Anonanimal"
-#' )
-#'
-#'add_genius(artist_songs, artist, track, type = "track")
-#'
-#'#' # Tracks and Albums
-#' mixed_type <- tibble::tribble(
-#'   ~artist, ~album, ~type,
-#'   "J. Cole", "KOD", "album",
-#'   "Andrew Bird", "Proxy War", "track"
-#' )
-#'
-#'add_genius(mixed_type, artist, album, type)
-#'
+#' #  # Albums only
+#' #
+#' #  artist_albums <- tibble::tribble(
+#' #   ~artist, ~album,
+#' #   "J. Cole", "KOD",
+#' #   "Sampha", "Process"
+#' # )
+#' #
+#' # add_genius(artist_albums, artist, album, type = "album")
+#' #
+#' #  # Individual Tracks only
+#' #
+#' #  artist_songs <- tibble::tribble(
+#' #   ~artist, ~track,
+#' #   "J. Cole", "Motiv8",
+#' #   "Andrew Bird", "Anonanimal"
+#' #  )
+#' #
+#' #  # Tracks and Albums
+#' #  mixed_type <- tibble::tribble(
+#' #    ~artist, ~album, ~type,
+#' #    "J. Cole", "KOD", "album",
+#' #    "Andrew Bird", "Proxy War", "track"
+#' #  )
+#' #
+#' # add_genius(mixed_type, artist, album, type)
+#' # add_genius(artist_songs, artist, track, type = "track")
 #'}
 #'
 #'
